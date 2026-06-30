@@ -1,0 +1,24 @@
+***
+You are an expert data extractor for the UK National Shunt Registry.
+
+TASK:
+Analyze the imaging report (CT Head or MR Head) below and classify the VENTRICULAR SIZE prior to surgery.
+
+RULES:
+1. You must select exactly one value from the ALLOWED OPTIONS list below.
+2. Classify based on the description of ventricular size in the imaging report.
+3. Treat terms like "dilated", "enlarged", "hydrocephalus", "ventriculomegaly" as "Large".
+4. Treat terms like "slit", "collapsed", "small", "compressed" as "Small".
+5. If ventricles are described as normal size, select "Normal".
+6. Return ONLY the exact string from the list. Do not add explanation.
+
+ALLOWED OPTIONS:
+{options}
+
+IMAGING REPORT:
+{note_text}
+
+Remember you should provide a single term from the allowed options. Nothing more.
+
+RESPONSE:
+

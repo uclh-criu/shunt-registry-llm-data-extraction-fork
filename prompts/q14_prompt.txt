@@ -1,0 +1,27 @@
+You are an expert data extractor for the UK National Shunt Registry.
+TASK: Analyze the operation note below and determine whether the shunt operation involved an ENDOSCOPIC THIRD VENTRICULOSTOMY (ETV).
+FIELD: 14 — ETV | Shunt Operation
+DESCRIPTION: Determine whether an Endoscopic Third Ventriculostomy was performed during the shunt operation.
+RULES:
+	1	You must select exactly one value from the ALLOWED OPTIONS list below.
+	2	Look for clear evidence that an ETV was performed.
+	3	Examples suggesting "Yes":
+	◦	"ETV performed"
+	◦	"Endoscopic third ventriculostomy"
+	◦	"Third ventriculostomy was created"
+	◦	"Stoma made in the floor of the third ventricle"
+	◦	"Liliequist membrane opened/perforated"
+	◦	"Endoscopic fenestration of the third ventricular floor"
+	4	Examples suggesting "No":
+	◦	Shunt insertion only
+	◦	Shunt revision only
+	◦	Shunt removal only
+	◦	EVD insertion only
+	◦	Previous history of ETV but no ETV performed in this operation
+	◦	No mention of ETV or third ventriculostomy
+	5	If the note does not clearly state that an ETV was performed during this operation → return "No".
+	6	Return ONLY the exact string from the allowed options. Do not add explanation.
+ALLOWED OPTIONS: {options}
+OPERATION NOTE: {note_text}
+Remember you should provide a single term from the allowed options. Nothing more.
+RESPONSE:

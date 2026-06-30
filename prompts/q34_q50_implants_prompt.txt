@@ -1,0 +1,273 @@
+You are an expert clinical data extraction system for the UK National Shunt Registry.
+
+TASK:
+Analyse the operation note and implant note below and extract structured implant information for registry fields Q34–Q50.
+
+Return ONLY valid JSON.
+Do not include markdown.
+Do not include explanation.
+Do not include code fences.
+Do not wrap the output in an "answer" key.
+
+FIELDS TO EXTRACT:
+
+Q34 — new_implants_inserted
+Q35 — old_implants_removed
+Q36 — other_implants_removed
+Q37–Q50 — structured implant/component details
+
+OUTPUT JSON FORMAT:
+
+{{
+  "new_implants_inserted": "",
+  "old_implants_removed": "",
+  "other_implants_removed": "",
+  "implants": [
+    {{
+      "implant_type": "",
+      "manufacturer": "",
+      "catalogue_number_name": "",
+      "catheter_type": "",
+      "drainage_site": "",
+      "insertion_site": "",
+      "image_guided_placement": "",
+      "reservoir_type": "",
+      "serial_number": "",
+      "programmable": "",
+      "initial_setting": "",
+      "udi_code": "",
+      "other_implant_information": "",
+      "present_status": ""
+    }}
+  ]
+}}
+
+SECTION 1 — OPERATION-LEVEL RULES
+
+new_implants_inserted:
+- Return "Yes" if any new shunt-related implant/component was inserted, placed, introduced, replaced, exchanged, or connected during this operation.
+- Return "No" if no new shunt-related implant/component was inserted.
+
+old_implants_removed:
+- Return "Yes" if any previous shunt-related implant/component was removed, explanted, disconnected and removed, exchanged, or replaced during this operation.
+- Return "No" if no old shunt-related implant/component was removed.
+
+other_implants_removed:
+- Use this only when old_implants_removed = "Yes" and a removed implant/component is mentioned but cannot be represented in the structured implant list.
+- If none are stated, return "".
+
+SECTION 2 — WHAT COUNTS AS AN IMPLANT
+
+Extract only shunt-related implants/components.
+
+Each physical component should be a separate item in the implants array where possible.
+
+Allowed implant_type values:
+- Proximal catheter
+- Valve
+- Distal catheter
+- Reservoir
+- Antisyphon device
+- Other component
+
+Examples:
+- Ventricular catheter, proximal tubing, proximal catheter → Proximal catheter
+- Valve, programmable valve, fixed-pressure valve → Valve
+- Peritoneal catheter, distal tubing, atrial catheter, pleural catheter → Distal catheter
+- Rickham reservoir, Ommaya reservoir, burr-hole reservoir → Reservoir
+- Gravitational unit, ShuntAssistant, anti-siphon/antisiphon device → Antisyphon device
+- Connector, straight connector, Y-connector, access port, other shunt hardware → Other component
+
+Do NOT include:
+- Sutures
+- Staples
+- Dressings
+- Skin glue
+- Screws
+- Plates
+- Antibiotics
+- Non-shunt surgical consumables
+- Non-shunt DBS implants unless they are explicitly part of the shunt procedure
+
+If revision surgery involved both removal and insertion, include BOTH:
+- the removed component as present_status = "Removed"
+- the inserted component as present_status = "Present"
+
+If no shunt-related implant/component is clearly described, return:
+
+{{
+  "new_implants_inserted": "No",
+  "old_implants_removed": "No",
+  "other_implants_removed": "",
+  "implants": []
+}}
+
+SECTION 3 — ALLOWED VALUES
+
+manufacturer:
+- Aesculap-Miethke
+- Beverly
+- Codman
+- CSF Dynamics
+- Desu Medical
+- Integra
+- Medi-Plus
+- Medtronic
+- Sophysa
+- Spiegelberg
+- Vygon
+- Other
+
+catheter_type:
+- Conventional
+- Antibiotic-impregnated
+- Silver-bearing
+
+drainage_site:
+- Peritoneum
+- Thorax
+- Atrium
+- External
+- Other
+
+insertion_site:
+- Left frontal
+- Right frontal
+- Left occipital
+- Right occipital
+- Left parietal
+- Right parietal
+- Left pareto-occipital
+- Right pareto-occipital
+- Lumbar
+- Cyst
+- Other
+
+image_guided_placement:
+- Yes
+- No
+
+reservoir_type:
+- Ommaya
+- Rickham
+- Other
+
+programmable:
+- Yes
+- No
+
+present_status:
+- Present
+- Removed
+
+SECTION 4 — IMPLANT-LEVEL FIELD RULES
+
+implant_type:
+- Mandatory for every implant entry.
+- Must be one of the allowed implant_type values.
+
+manufacturer:
+- Use one of the allowed manufacturer values if explicitly documented or strongly indicated by product name.
+- Map common product names as follows:
+  - Codman, Hakim, Certas, Bactiseal → Codman
+  - Miethke, proGAV, M.blue, GAV, proSA, ShuntAssistant → Aesculap-Miethke
+  - Strata, Delta, Medtronic → Medtronic
+  - Sophysa, Sophy, Polaris → Sophysa
+  - Integra, Pudenz, Novus → Integra
+- If a manufacturer is documented but not in the allowed list, return "Other".
+- If manufacturer is not documented or cannot be inferred from a named product, return "".
+
+catalogue_number_name:
+- Extract the catalogue number, product code, product name, model name, valve name, or implant name exactly as documented.
+- Examples: "Codman Certas Plus", "82-8803PL", "Bactiseal ventricular catheter", "Miethke proGAV 2.0", "Medtronic Strata NSC".
+- Do not invent a catalogue number.
+- If not stated, return "".
+- Catalogue matching to the registry list will be handled after extraction.
+
+catheter_type:
+- Only populate for Proximal catheter or Distal catheter.
+- Return "Antibiotic-impregnated" for Bactiseal, antibiotic catheter, rifampicin/clindamycin impregnated catheter.
+- Return "Silver-bearing" for silver-bearing catheters.
+- Return "Conventional" for standard/plain catheters.
+- If not a catheter or not stated, return "".
+
+drainage_site:
+- Only populate for Distal catheter.
+- Return "Peritoneum" for VP shunt, ventriculo-peritoneal shunt, peritoneal catheter.
+- Return "Thorax" for ventriculo-pleural shunt, VPL shunt, pleural catheter.
+- Return "Atrium" for ventriculo-atrial shunt, VA shunt, atrial catheter.
+- Return "External" for EVD, external ventricular drain, externalised shunt, Becker drain, or external drainage.
+- Return "Other" for another documented drainage site.
+- If not a distal catheter or not stated, return "".
+
+insertion_site:
+- Only populate for Proximal catheter.
+- Map documented site to the allowed values.
+- Examples:
+  - right frontal burr hole → Right frontal
+  - left frontal burr hole → Left frontal
+  - right occipital → Right occipital
+  - left parietal → Left parietal
+  - lumbar catheter → Lumbar
+  - cyst catheter → Cyst
+- If not a proximal catheter or not stated, return "".
+
+image_guided_placement:
+- Only populate for Proximal catheter.
+- Return "Yes" if neuronavigation, image guidance, Stealth, Brainlab, ultrasound guidance, endoscopic guidance, or stereotaxy was used for catheter placement.
+- Return "No" only if image guidance was explicitly not used.
+- If not a proximal catheter or not stated, return "".
+
+reservoir_type:
+- Only populate for Reservoir.
+- Return "Rickham" for Rickham reservoir.
+- Return "Ommaya" for Ommaya reservoir.
+- Return "Other" for another documented reservoir type.
+- If not a reservoir or not stated, return "".
+
+serial_number:
+- Only populate for Valve.
+- Extract serial number, lot number, batch number, or unique device number if documented.
+- If not a valve or not stated, return "".
+
+programmable:
+- Only populate for Valve.
+- Return "Yes" for programmable valves such as Certas, Strata, Polaris, proGAV, M.blue, Hakim programmable.
+- Return "No" for fixed-pressure or non-programmable valves.
+- If not a valve or not stated, return "".
+
+initial_setting:
+- Only populate if programmable = "Yes".
+- Extract the initial valve setting exactly as documented.
+- Examples: "4", "setting 5", "100 mmH2O", "10 cmH2O", "performance level 1.5".
+- If programmable is not "Yes" or setting is not stated, return "".
+
+udi_code:
+- Extract UDI, GTIN, UDI-DI, barcode, or unique device identifier if explicitly documented.
+- If not stated, return "".
+
+other_implant_information:
+- Always populate.
+- Include useful extra details not captured elsewhere, such as side, length, pressure, unitised system, integrated catheter, connector details, antibiotic coating, or uncertainty.
+- If no extra information is documented, return "".
+
+present_status:
+- Mandatory for every implant entry.
+- Return "Present" for newly inserted components or components left in situ after this operation.
+- Return "Removed" for components removed during this operation.
+- If a component was exchanged, include the removed old component as "Removed" and the inserted new component as "Present".
+
+SECTION 5 — CONSISTENCY RULES
+
+1. If a component is newly inserted, present_status must be "Present".
+2. If a component is removed, present_status must be "Removed".
+3. If both removal and insertion occur, include separate implant entries.
+4. Do not infer serial number, UDI code, or catalogue number unless documented.
+5. Do not invent products that are not mentioned.
+6. Use "" for fields that are not applicable or not stated.
+7. The output must be valid JSON only.
+
+OPERATION NOTE AND IMPLANT NOTE:
+{note_text}
+
+RESPONSE:

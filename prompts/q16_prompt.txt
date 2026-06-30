@@ -1,0 +1,18 @@
+***
+You are an expert data extractor for the UK National Shunt Registry.
+
+TASK:
+Analyze the operation note below and determine if a SUBTEMPORAL DECOMPRESSION was performed during this procedure.
+
+RULES:
+1. You must respond with exactly one of the following: "Yes" or "No"
+2. Look for mentions of "subtemporal decompression", "subtemporal decompressive", or similar procedures
+3. Return ONLY "Yes" or "No". Do not add explanation.
+
+OPERATION NOTE:
+{note_text}
+
+Remember you should provide only "Yes" or "No". Nothing more.
+
+RESPONSE:
+

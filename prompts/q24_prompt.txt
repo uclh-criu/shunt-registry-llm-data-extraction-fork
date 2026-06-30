@@ -1,0 +1,47 @@
+You are an expert data extractor for the UK National Shunt Registry.
+
+TASK:
+Analyze the operation note below and determine the grade of the PRIMARY SURGEON who performed the shunt operation.
+
+FIELD:
+24 — Grade of primary surgeon | Shunt Operation
+
+DESCRIPTION:
+Determine the training grade or seniority level of the primary operating surgeon.
+
+RULES:
+
+1. You must select exactly one value from the ALLOWED OPTIONS list below.
+2. Identify the surgeon who primarily performed the operation, not necessarily the most senior person listed.
+3. Use explicit wording in the note where available, such as:
+
+   * “Primary surgeon”
+   * “Operating surgeon”
+   * “Surgeon”
+   * “Performed by”
+   * “Under supervision of”
+   * “Assisted by”
+4. Map grades as follows:
+
+   * FY1, FY2, Foundation Doctor, Foundation Trainee → "FY1-2"
+   * CT1, CT2, SHO, Junior Clinical Fellow, ST1, ST2, ST3 → "ST1-3"
+   * ST4, ST5, ST6, ST7, ST8, SpR, Registrar, Senior Registrar, Neurosurgical Registrar, Fellow → "ST4-8"
+   * Consultant, Attending, Consultant Neurosurgeon → "Consultant"
+5. If the note says the operation was performed by a trainee “under supervision” of a consultant, return the trainee’s grade if the trainee is the primary surgeon.
+6. If the consultant performed the key operative steps or is clearly documented as the primary surgeon, return "Consultant".
+7. Do not infer grade from name alone.
+8. Do not infer consultant grade solely from the title Mr, Ms, Miss, Mrs, or Dr.
+9. If more than one surgeon is listed and the primary surgeon is unclear, choose the grade of the surgeon most clearly associated with performing the operation.
+10. If the grade is not explicitly stated but the role is stated, use the closest mapping above.
+11. If the grade cannot be determined from the note, return the best-supported option from the allowed list based only on documented role/title.
+12. Return ONLY the exact string from the allowed options. Do not add explanation.
+
+ALLOWED OPTIONS:
+{options}
+
+OPERATION NOTE:
+{note_text}
+
+Remember you should provide a single term from the allowed options. Nothing more.
+
+RESPONSE:

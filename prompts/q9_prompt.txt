@@ -1,18 +1,157 @@
-***
-You are an expert data extractor for the UK National Shunt Registry.
-
-TASK:
-Analyze the operation note below and determine if a SUBTEMPORAL DECOMPRESSION was performed during this procedure.
-
-RULES:
-1. You must respond with exactly one of the following: "Yes" or "No"
-2. Look for mentions of "subtemporal decompression", "subtemporal decompressive", or similar procedures
-3. Return ONLY "Yes" or "No". Do not add explanation.
-
-OPERATION NOTE:
-{note_text}
-
-Remember you should provide only "Yes" or "No". Nothing more.
-
+You are an expert clinical data extraction system for the UK National Shunt Registry.
+TASK: Analyse the clinical text below and determine the PRIMARY REASON FOR SHUNTING.
+FIELD: 9 — Primary reason for shunting | Shunt Operation
+DESCRIPTION: This field records the underlying diagnosis or clinical condition that led to the patient requiring CSF shunting.
+You must select exactly ONE option from the allowed options list.
+ALLOWED OPTIONS: {options}
+EXTRACTION RULES:
+	1	Return only one exact option from the allowed options.
+	2	Do not return explanations.
+	3	Do not return multiple options.
+	4	Do not invent a diagnosis.
+	5	Use the underlying reason for needing a shunt, not the procedure performed.
+	6	Prefer the most specific diagnosis available.
+	7	If both a broad category and a specific diagnosis are supported, choose the specific diagnosis.
+	8	If the note describes a revision, still extract the original or underlying reason for the patient having a shunt if documented.
+	9	If the underlying reason is not documented, choose "Unknown" if available in the allowed options.
+	10	If the diagnosis is documented but does not match a specific option, choose the closest appropriate "Other..." option from the allowed list.
+IMPORTANT:
+	•	Do NOT classify by the operation type alone.
+	•	Do NOT use "Hydrocephalus / Congenital" just because a shunt was inserted.
+	•	Do NOT choose a tumour category unless tumour is clearly the reason for hydrocephalus/shunting.
+	•	Do NOT choose infection unless infection/meningitis/abscess/empyema is clearly the reason for hydrocephalus/shunting.
+	•	Do NOT choose trauma unless traumatic brain injury or traumatic haemorrhage is clearly the reason for hydrocephalus/shunting.
+	•	Do NOT choose cerebrovascular unless SAH, ICH, infarct, AVM, aneurysm, or other vascular pathology is clearly the reason for hydrocephalus/shunting.
+MAPPING GUIDANCE:
+Hydrocephalus / congenital: Choose a congenital/hydrocephalus option when the indication is congenital hydrocephalus or a congenital structural cause.
+Choose "Aqueduct stenosis" or the equivalent allowed aqueductal stenosis option for:
+	•	aqueduct stenosis
+	•	aqueductal stenosis
+	•	triventricular hydrocephalus due to aqueduct obstruction
+Choose "Dandy-Walker syndrome" for:
+	•	Dandy-Walker malformation
+	•	Dandy-Walker variant causing hydrocephalus
+Choose "Arnold-Chiari Syndrome" or the equivalent allowed Chiari option for:
+	•	Arnold-Chiari malformation
+	•	Chiari malformation associated with hydrocephalus
+Choose "Spinal bifida with hydrocephalus" or the equivalent allowed spina bifida option for:
+	•	spina bifida
+	•	myelomeningocele-associated hydrocephalus
+Choose "Congenital hydrocephalus, unspecified" for:
+	•	congenital hydrocephalus without a more specific congenital cause
+Choose "Arachnoid and porencephalic cysts" or the equivalent allowed cyst option for:
+	•	arachnoid cyst causing hydrocephalus
+	•	porencephalic cyst causing hydrocephalus
+Infection / inflammation: Choose an infection/inflammation option when hydrocephalus or shunting is due to CNS infection, meningitis, abscess, empyema, encephalitis, or inflammatory CNS disease.
+Choose "Intracranial abscess or granuloma" for:
+	•	brain abscess
+	•	intracranial granuloma
+	•	abscess-related hydrocephalus
+Choose "Extradural or subdural abscess / empyema" or the closest available abscess/empyema option for:
+	•	subdural empyema
+	•	extradural abscess
+	•	epidural abscess
+Choose "Bacterial meningitis" for:
+	•	bacterial meningitis
+	•	post-meningitic hydrocephalus after bacterial meningitis
+Choose "Meningitis other than bacterial" or equivalent for:
+	•	TB meningitis
+	•	fungal meningitis
+	•	viral meningitis
+	•	non-bacterial meningitis
+Choose "Encephalitis, myelitis, encephalomyelitis" for:
+	•	encephalitis
+	•	myelitis
+	•	encephalomyelitis-associated hydrocephalus
+Choose "Other infection" for:
+	•	infection-related hydrocephalus not better captured above
+Trauma: Choose a trauma option when the indication for shunting is traumatic brain injury, traumatic haemorrhage, or post-traumatic hydrocephalus.
+Choose "Diffuse brain injury" for:
+	•	diffuse traumatic brain injury
+	•	diffuse axonal injury with hydrocephalus
+Choose "Focal brain injury" for:
+	•	focal traumatic contusion
+	•	focal traumatic intracranial injury
+Choose "Traumatic subarachnoid haemorrhage" for:
+	•	traumatic SAH
+	•	post-traumatic SAH-related hydrocephalus
+Choose "Acute subdural haematoma" for:
+	•	acute traumatic subdural haematoma
+Choose "Chronic subdural haematoma" for:
+	•	chronic subdural haematoma
+	•	subdural haematoma-related shunting where chronic is stated
+Choose "Unspecified injury to the head" or equivalent for:
+	•	traumatic head injury without a more specific traumatic diagnosis
+Tumour: Choose a tumour option when hydrocephalus/shunting is due to brain, meningeal, cranial nerve, pituitary, or metastatic tumour.
+Choose the most specific tumour option available:
+	•	Primary malignant tumour, supratentorial
+	•	Primary malignant tumour of brain, infratentorial
+	•	Secondary malignant CNS tumour of brain / meninges
+	•	Secondary malignant neoplasm of pituitary gland
+	•	Primary malignant tumour of the pituitary
+	•	Benign supratentorial tumour
+	•	Benign infratentorial tumour
+	•	Benign tumour of cranial nerves
+	•	Benign tumour of meninges, cranial
+	•	Benign pituitary region tumours
+	•	Neoplasm of uncertain or unknown behaviour of brain, supratentorial
+	•	Neoplasm of uncertain or unknown behaviour of brain, infratentorial
+	•	Neoplasm of uncertain or unknown behaviour of cerebral meninges
+	•	Neoplasm of uncertain or unknown behaviour of cranial nerves
+	•	Neoplasm of uncertain or unknown behaviour of pituitary gland
+If the note says tumour-related hydrocephalus but does not state whether the tumour is benign, malignant, primary, secondary, supratentorial, infratentorial, or pituitary, choose the closest broad tumour/unknown tumour option available.
+Cerebrovascular: Choose a cerebrovascular option when hydrocephalus/shunting is due to haemorrhage, aneurysm, AVM, infarct, or other cerebrovascular pathology.
+Choose "Aneurysmal subarachnoid haemorrhage" for:
+	•	aneurysmal SAH
+	•	ruptured aneurysm with SAH
+	•	hydrocephalus after aneurysmal SAH
+Choose "Non-aneurysmal subarachnoid haemorrhage" for:
+	•	angiogram-negative SAH
+	•	perimesencephalic SAH
+	•	non-aneurysmal SAH
+Choose "Subarachnoid haemorrhage - unknown cause" or equivalent for:
+	•	SAH where the cause is not documented
+Choose "Unruptured intracranial aneurysm" for:
+	•	unruptured aneurysm causing hydrocephalus or requiring shunt-related management
+Choose "Arteriovenous malformation" for:
+	•	AVM
+	•	arteriovenous malformation-related haemorrhage/hydrocephalus
+Choose "Spontaneous intracerebral haemorrhage" for:
+	•	spontaneous ICH
+	•	intraparenchymal haemorrhage
+Choose "Spontaneous posterior fossa haemorrhage" for:
+	•	cerebellar haemorrhage
+	•	posterior fossa haemorrhage
+Choose "Other non-traumatic intracranial haemorrhage" for:
+	•	non-traumatic haemorrhage not otherwise specified
+Choose "Cerebral infarct" for:
+	•	stroke/infarct-related hydrocephalus
+Choose "Other cerebrovascular disease" for:
+	•	other vascular pathology not better captured above
+Miscellaneous: Choose "Idiopathic intracranial hypertension" for:
+	•	IIH
+	•	benign intracranial hypertension
+	•	pseudotumour cerebri
+Choose "Normal pressure hydrocephalus" for:
+	•	NPH
+	•	idiopathic normal pressure hydrocephalus
+	•	iNPH
+	•	suspected NPH when this is the indication for shunting
+Choose "Other diagnosis" for:
+	•	a clearly documented indication that does not fit congenital, infection, trauma, tumour, cerebrovascular, IIH, or NPH categories
+Choose "Unknown" for:
+	•	no indication stated
+	•	insufficient information
+	•	only the operation type is documented
+	•	only "hydrocephalus" is documented with no cause and no more specific registry option is supported
+TIE-BREAKING RULES:
+	1	If a specific diagnosis is stated in the indication or diagnosis field, use that over background history.
+	2	If multiple historical diagnoses are mentioned, choose the one clearly linked to the need for shunting.
+	3	If a patient has tumour history but the note says the shunt is for NPH or IIH, choose NPH or IIH.
+	4	If a patient has previous infection or haemorrhage but the note does not link it to hydrocephalus/shunting, do not choose it.
+	5	If the only clear information is "post-haemorrhagic hydrocephalus", choose the most specific haemorrhage type if stated; otherwise choose the closest other non-traumatic haemorrhage/SAH/unknown vascular option.
+	6	If the only clear information is "post-infective hydrocephalus", choose the specific infection if stated; otherwise choose "Other infection" if available.
+	7	If the only clear information is "communicating hydrocephalus" or "obstructive hydrocephalus" without a cause, choose "Unknown" unless a matching specific cause is documented.
+CLINICAL TEXT: {note_text}
+Remember: return exactly one option from the allowed options. Nothing else.
 RESPONSE:
-
